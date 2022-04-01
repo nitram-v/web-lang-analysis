@@ -13,35 +13,80 @@ MACROS={'LOWERCASE': 'a-zšžõäöü','UPPERCASE': 'A-ZŠŽÕÄÖÜ','NUMERIC':
 MACROS['LETTERS'] = MACROS['LOWERCASE'] + MACROS['UPPERCASE']
 MACROS['ALPHANUM'] = MACROS['LETTERS'] + MACROS['NUMERIC']
 
+sonad = []
+with open('data/zž_sõnad.txt') as f:
+    sonad = f.readlines()
+    
+sonad = [line.rstrip('\n') for line in sonad]
+
+def foreign_z_letters_val(m):
+    return not m.group(0).lstrip() in sonad
+
+def punct_reps_val(m):
+    if any(char in emoji.UNICODE_EMOJI['en'] for char in m.group(0)):
+        return False
+    if len([flag for flag in re.finditer(u'[\U0001F1E6-\U0001F1FF]+', m.group(0))]) > 0:
+        return False
+    return True
+
+def domain_val(m):
+    re_pattern = re.compile(r'''(\.ee|\.com|\.ru)($|[^{ALPHANUM}])'''.format(**MACROS),re.X)
+    matched = re_pattern.finditer(m.group(0))
+    matches = [match.group(0) for match in matched]
+    if len(matches) > 0:
+        return False
+    return True
+
 vocabulary = [
               {'_regex_pattern_': re.compile(r'''([^\n\. {ALPHANUM}])\1{1,}'''.format(**MACROS),re.X),
-               'comment':'punctuation mark more than once (except a dot)','pattern_type':'punct_reps','example':'!!!!!!!!!'},
+               '_validator_': punct_reps_val,
+               'comment':'punctuation mark more than once (except a dot)',
+               'pattern_type':'punct_reps',
+               'example':'!!!!!!!!!'},
     
               {'_regex_pattern_': re.compile(r'''([\.]{4,}|[^\.][\.][\.][^\.])'''.format(**MACROS),re.X),
-               'comment':'punctuation mark two or more than three times (a dot)','pattern_type':'punct_reps','example':'......'},
+               'comment':'punctuation mark two or more than three times (a dot)',
+               'pattern_type':'punct_reps',
+               'example':'......'},
     
-              {'_regex_pattern_': re.compile(r'''[\s\n][^\s\n{NUMERIC}]*([{LETTERS}])\1{2,}[^\s\?,\.\)\!]*'''.format(**MACROS),re.X),
-               'comment':'letter more than twice','pattern_type':'letter_reps','example':'jaaaaa'},
+              {'_regex_pattern_': re.compile(r'''(?:^|\s|\n)[^\s\n{NUMERIC}]*([{LETTERS}])\1{2,}[^\s\?,\.\)\!]*'''.format(**MACROS),re.X),
+               'comment':'letter more than twice',
+               'pattern_type':'letter_reps',
+               'example':'jaaaaa'},
     
-              {'_regex_pattern_': re.compile(r'''\s[^ ]+[^{ALPHANUM} \-\‑\–\n\’\´\\'(\"\”/\[\«]+[^ \“\„\"\-!\?\.,\‑\n{NUMERIC}\)\(\[\]\»\”\']'''.format(**MACROS),re.X),
-               'comment':'no spaces after punctuation marks','pattern_type':'no_spaces',
-               'example':'tere!kuidas läheb?hästi','_group_': 0},
+              {'_regex_pattern_': re.compile(r'''[{LETTERS}]{2,}[^\s{ALPHANUM}ôÔ\-_/'\*][{LETTERS}]{2,}'''.format(**MACROS), re.X),
+               '_validator_': domain_val,
+               'comment':'no spaces after punctuation marks',
+               'pattern_type':'no_spaces',
+               'example':'tere!kuidas läheb?hästi',
+               '_group_': 0},
     
-              {'_regex_pattern_': re.compile(r'''\s[{UPPERCASE}]{2,}[^{LOWERCASE}\-]+[{UPPERCASE} ,.!\?]+(\s|[,\.!\?]+)[{UPPERCASE}][^ ]*'''.format(**MACROS),re.X),
-               'comment':'some parts of texts written in capital letters','pattern_type':'capital_letters',
+              {'_regex_pattern_': re.compile(r'''(\s|^)[{UPPERCASE}]{2,}[^{LOWERCASE}\-]+[{UPPERCASE} ,.!\?]+(\s|[,\.!\?]+)[{UPPERCASE}][^ ]*'''.format(**MACROS),re.X),
+               'comment':'some parts of texts written in capital letters',
+               'pattern_type':'capital_letters',
                'example':'MISASJA? kas päriselt? MINE METSA!'},
     
-              {'_regex_pattern_': re.compile(r'''\s(?=[^{UPPERCASE}\s]*[cqwxy])[^ ]* '''.format(**MACROS),re.X),
-               'comment':'if foreign letters are used','pattern_type':'foreign_letters',
+              {'_regex_pattern_': re.compile(r'''(?:^|\s)((?=[^{UPPERCASE}\s]*[cqwxy])[^ ]*) '''.format(**MACROS),re.X),
+               'comment':'if foreign letters are used',
+               'pattern_type':'foreign_letters',
                'example':'ma ei viici yksi'},
     
               {'_regex_pattern_': re.compile(r'''[^{NUMERIC}\.]([\!\?\.]{1,2}|[\!\?\.]{4,})\s*[{LOWERCASE}]+\s'''.format(**MACROS),re.X),
-               'comment':'capital letters ignored (except after a dot)','pattern_type':'ignored_capital',
+               '_validator_': domain_val,
+               'comment':'capital letters ignored (except after a dot)',
+               'pattern_type':'ignored_capital',
                'example':'tule siia! ma ei viitsi.'},
     
               {'_regex_pattern_': re.compile(r'''[{ALPHANUM}]+\s([^{ALPHANUM}\n \.\…\&§\-\–\‒\—\+\=•]|\.)\s[{ALPHANUM}]+'''.format(**MACROS),re.X),
-               'comment':'spaces around punctuation marks','pattern_type':'incorrect_spaces',
-               'example':'See on tore ! Mulle meeldib.'},    
+               'comment':'spaces around punctuation marks',
+               'pattern_type':'incorrect_spaces',
+               'example':'See on tore ! Mulle meeldib.'},
+    
+              {'_regex_pattern_': re.compile(r'''(?:^|\s)((?=[^{UPPERCASE}\s]*[z])[^ ]*) '''.format(**MACROS),re.X),
+               '_validator_': foreign_z_letters_val,
+               'comment':'if foreign z is used',
+               'pattern_type':'foreign_z_letters',
+               'example':'plz aita mind kodutööga'},
              ]
 
 
