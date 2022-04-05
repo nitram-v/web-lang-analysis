@@ -1,4 +1,5 @@
-from estnltk.taggers import Retagger
+from estnltk.taggers import Tagger
+from estnltk import Text, Layer
 from estnltk.taggers import RegexTagger
 import estnltk.taggers.dict_taggers.vocabulary 
 from estnltk.taggers import VabamorfTagger
@@ -6,6 +7,9 @@ from estnltk.taggers import ClauseSegmenter
 import regex as re
 from collections import defaultdict
 from estnltk.layer.span_operations import conflict
+import emoji
+import regex as re
+import itertools
 
 
 MACROS={'LOWERCASE': 'a-zšžõäöü','UPPERCASE': 'A-ZŠŽÕÄÖÜ','NUMERIC': '0-9','2,':'{2,}','1,':'{1,}','4,':'{4,}','0,1':'{0,1}','1,2':'{1,2}'}
@@ -14,7 +18,7 @@ MACROS['LETTERS'] = MACROS['LOWERCASE'] + MACROS['UPPERCASE']
 MACROS['ALPHANUM'] = MACROS['LETTERS'] + MACROS['NUMERIC']
 
 sonad = []
-with open('data/zž_sõnad.txt') as f:
+with open('z_words.txt') as f:
     sonad = f.readlines()
     
 sonad = [line.rstrip('\n') for line in sonad]
