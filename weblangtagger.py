@@ -96,7 +96,7 @@ vocabulary = [
 
 
 class WebLangTagger(Tagger):
-    """Retagger for detecting web language features in text. Web language features will be marked as attributes of the paragraphs layer."""
+    """Tagger for detecting web language features in text. Web language features will be tagged and saved to weblang_tokens layer"""
     
     conf_param = ['use_unknown_words','use_emoticons','use_letter_reps','use_punct_reps','use_capital_letters',
                   'use_missing_commas','use_ignored_capital','use_no_spaces','use_incorrect_spaces','use_foreign_letters',
