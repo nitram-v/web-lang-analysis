@@ -12,4 +12,4 @@ The name of the user dictionary file has to be 'z_words.txt' and each line has t
 An empty 'z_words.txt' file is included.
 
 A tutorial for WebLangTagger is included ('weblangtagger_tutorial.ipynb') and a notebook 'andmetest_1.ipynb' from my thesis is included as well, where an overview of tweeting dynamics is made.
-Other notebooks from my thesis aren't included with this repository (tagging the web language attributes, doing a morphological analysis and tagging None-words, plotting the findings).
+Other notebooks from my thesis are not included with this repository (tagging the web language attributes, doing a morphological analysis and tagging None-words, plotting the findings).
